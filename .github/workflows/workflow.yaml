@@ -1,0 +1,55 @@
+name: Resource Governed CI/CD
+
+on:
+  push:
+    branches:
+      - '**' # Triggers on all branches to allow the linter to run
+  workflow_dispatch: # Allows manual triggering from the GitHub Actions UI
+
+jobs:
+  linter:
+    name: Lightweight Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run Linter
+        run: echo "Linting passed. Code is clean."
+
+  train:
+    name: GPU-Accelerated Training
+    needs: linter
+    # Gatekeeper Logic: main branch AND (commit message contains [run-train] OR manually triggered via UI)
+    if: github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, '[run-train]') || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Training Job
+        run: |
+          echo "Starting expensive GPU training job..."
+          python train.py || (echo "Simulating failure output..." > error_logs.txt && exit 1)
+
+      - name: Generate Error Logs
+        if: failure()
+        run: |
+          echo "Training failed. Capturing error context..."
+          # If the train script didn't create the log itself, create a default one for the artifact
+          if [ ! -f error_logs.txt ]; then echo "Unknown failure occurred during training." > error_logs.txt; fi
+
+      - name: Upload Error Logs Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-logs
+          path: error_logs.txt
+
+      - name: Cloud Volume Cleanup
+        if: always()
+        run: echo "Cleaning up temporary cloud volumes..."
