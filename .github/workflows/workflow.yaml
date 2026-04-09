@@ -19,7 +19,7 @@ jobs:
     name: GPU-Accelerated Training
     needs: linter
     # Gatekeeper Logic: main branch AND (commit message contains [run-train] OR manually triggered via UI)
-    if: github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, '[run-train]')
+    if: github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, '[run-train]'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
