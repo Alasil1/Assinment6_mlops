@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - '**' # Triggers on all branches to allow the linter to run
-  workflow_dispatch: # Allows manual triggering from the GitHub Actions UI
 
 jobs:
   linter:
@@ -20,7 +19,7 @@ jobs:
     name: GPU-Accelerated Training
     needs: linter
     # Gatekeeper Logic: main branch AND (commit message contains [run-train] OR manually triggered via UI)
-    if: github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, '[run-train]') || github.event_name == 'workflow_dispatch')
+    if: github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, '[run-train]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
