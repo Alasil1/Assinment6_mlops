@@ -35,6 +35,8 @@ jobs:
         run: |
           echo "Starting expensive GPU training job..."
           python train.py 2>&1 | tee error_logs.txt
+          # Force the step to fail if the python command failed, ignoring tee's exit code
+          exit ${PIPESTATUS[0]}
 
       - name: Generate Error Logs
         if: failure()
