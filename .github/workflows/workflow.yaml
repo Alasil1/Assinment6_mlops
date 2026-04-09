@@ -34,7 +34,7 @@ jobs:
       - name: Run Training Job
         run: |
           echo "Starting expensive GPU training job..."
-          python train.py || (echo "Simulating failure output..." > error_logs.txt && exit 1)
+          python train.py 2>&1 | tee error_logs.txt
 
       - name: Generate Error Logs
         if: failure()
