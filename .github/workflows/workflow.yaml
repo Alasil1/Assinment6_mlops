@@ -33,14 +33,12 @@ jobs:
         run: |
           echo "Starting expensive GPU training job..."
           python train.py 2>&1 | tee error_logs.txt
-          # Force the step to fail if the python command failed, ignoring tee's exit code
           exit ${PIPESTATUS[0]}
 
       - name: Generate Error Logs
         if: failure()
         run: |
           echo "Training failed. Capturing error context..."
-          # If the train script didn't create the log itself, create a default one for the artifact
           if [ ! -f error_logs.txt ]; then echo "Unknown failure occurred during training." > error_logs.txt; fi
 
       - name: Upload Error Logs Artifact
